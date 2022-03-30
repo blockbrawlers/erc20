@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./ITokenManager";
+import "../contracts/ITokenManager";
 
 
 /**
@@ -28,15 +28,15 @@ contract MainERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return 100000000 * 10 **18;
+        return 270000000 * 10 **18;
     }
 
     function balanceOf(address account) public view returns (uint256) {
-        return 100000000 * 10 **18;
+        return 270000000 * 10 **18;
     }
 
     function allowance(address owner, address spender) public view returns (uint256) {
-        return 100000000 * 10 **18;
+        return 270000000 * 10 **18;
     }
 
     function exitToMainPayable()
