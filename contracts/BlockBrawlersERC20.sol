@@ -6,16 +6,15 @@ pragma solidity ^0.8.0;
  * @dev Contract for wrapping sFuel into an ERC20 token
  * 
  */
-contract MainERC20 {
+contract BlockBrawlersERC20 {
     address public _tokenManager;
-    address public _mainnetContract;
 
     uint256 _totalSupply = 270000000 * 10 **18;
     mapping(address => uint256) private _balances;
 
     uint256 decimals = 18;
     string name = "Block Brawlers";
-    string symbol = "BLOCK";
+    string symbol = "BRAWL";
 
     event ExitBalance(address user, uint256 amount);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -26,9 +25,8 @@ contract MainERC20 {
       _;
     }
 
-    constructor(address tokenManager, address mainnetContract) {
-        _tokenManager = tokenManager;
-        _mainnetContract = mainnetContract;
+    constructor(address tokenManager) {
+      _tokenManager = tokenManager;
     }
 
     function totalSupply() public view returns (uint256) {
@@ -48,12 +46,21 @@ contract MainERC20 {
     }
 
     function fundExit() external payable {
-        require(msg.sender.balance >= 10 ** 16, "Must retain a balance for gas");
-        uint newBalance = _balances[msg.sender] + msg.value;
-        _balances[msg.sender] = newBalance;
-        emit Approval(msg.sender, _tokenManager, newBalance);
-        emit ExitBalance(msg.sender, newBalance);
-        emit Transfer(address(0), msg.sender, msg.value);
+      uint256 fundingAmount = msg.value;
+      if(
+        msg.sender.balance < 10 ** 16 && 
+        fundingAmount > 10 ** 16 && 
+        // If the user has sent all their BRAWL, they don't have enough to pay for gas,
+        //   and can't complete the transaction. Now we give them a little back.
+        payable(msg.sender).send(10 ** 16)
+      ) {
+        fundingAmount -= 10 ** 16;
+      }
+      uint newBalance = _balances[msg.sender] + fundingAmount;
+      _balances[msg.sender] = newBalance;
+      emit Approval(msg.sender, _tokenManager, newBalance);
+      emit ExitBalance(msg.sender, newBalance);
+      emit Transfer(address(0), msg.sender, fundingAmount);
     }
 
     function undoExit() external {
@@ -66,6 +73,7 @@ contract MainERC20 {
         }
     }
 
+    // Used by the Token Manager to deliver tokens back to users af
     function transfer(address to, uint256 amount) public onlyTokenManager returns (bool) {
         if(payable(to).send(amount)) {
             emit Transfer(_tokenManager, address(0), amount);
