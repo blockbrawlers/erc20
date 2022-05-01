@@ -17,7 +17,10 @@ async function main() {
   const BlockBrawlersERC20 = await ethers.getContractFactory(
     "BlockBrawlersERC20"
   );
-  const bbERC20 = await BlockBrawlersERC20.deploy("Hello, Hardhat!");
+
+  const imaBridge = "0xD2aAA00500000000000000000000000000000000";
+
+  const bbERC20 = await BlockBrawlersERC20.deploy(imaBridge);
 
   await bbERC20.deployed();
 
