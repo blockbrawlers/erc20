@@ -34,6 +34,10 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
-    "@skalenetwork/ima-js": "^1.0.0-develop.1"
+    "@skalenetwork/ima-js": "^1.0.0-develop.1",
+    "eth-revert-reason": "^1.0.3"
+  },
+  "scripts": {
+    "imalink": "ts-node --script-mode ./scripts/imalink.ts"
   }
 }
