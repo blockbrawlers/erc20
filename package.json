@@ -33,11 +33,15 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
+    "@gnosis.pm/safe-contracts": "^1.3.0",
     "@openzeppelin/contracts": "^4.5.0",
     "@skalenetwork/ima-js": "^1.0.0-develop.1",
     "eth-revert-reason": "^1.0.3"
   },
   "scripts": {
-    "imalink": "ts-node --script-mode ./scripts/imalink.ts"
+    "deploy": "ts-node --script-mode ./scripts/deploy.ts",
+    "linkSchains": "ts-node --script-mode ./scripts/linkSchains.ts",
+    "imalink": "ts-node --script-mode ./scripts/imalink.ts",
+    "registerErc20": "ts-node --script-mode ./scripts/registerErc20.ts"
   }
 }

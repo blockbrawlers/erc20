@@ -14,13 +14,9 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const BlockBrawlersERC20 = await ethers.getContractFactory(
-    "BlockBrawlersERC20"
-  );
+  const Brawl = await ethers.getContractFactory("Brawl");
 
-  const imaBridge = "0xD2aAA00500000000000000000000000000000000";
-
-  const bbERC20 = await BlockBrawlersERC20.deploy(imaBridge);
+  const bbERC20 = await Brawl.deploy();
 
   await bbERC20.deployed();
 
